@@ -1222,6 +1222,12 @@ int add_file_buffer_to_map(string filename, const void *data, size_t size)
 	}
 
 	memcpy(p->data(), data, size);
+
+	/*
+	 * request_data clamps every read to m_available_size, on the loaded path
+	 * as well, so a buffer that does not set it reads back as empty.
+	 */
+	p->m_available_size = size;
 	atomic_fetch_or(&p->m_dataflags, FILEBUFFER_FLAG_LOADED);
 
 	{
