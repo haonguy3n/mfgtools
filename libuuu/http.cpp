@@ -35,7 +35,7 @@
 #include <ws2tcpip.h>
 #include <windows.h>
 #include <winhttp.h>
-#pragma comment(lib, "Winhttp.lib")
+#pragma comment(lib, "winhttp.lib")
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
