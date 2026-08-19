@@ -164,6 +164,8 @@ class FileBuffer: public std::enable_shared_from_this<FileBuffer>
 {
 public:
 	friend class DataBuffer;
+	/* Fills a FileBuffer from memory instead of from a file. */
+	friend int add_file_buffer_to_map(std::string filename, const void *data, size_t size);
 	friend class FSBase;
 	friend class FSFlat;
 	friend class FSHttps;
@@ -339,6 +341,7 @@ private:
 	ALLOCATION_WAYS m_allocate_way = ALLOCATION_WAYS::MALLOC;
 };
 
+int add_file_buffer_to_map(std::string filename, const void *data, size_t size);
 std::shared_ptr<FileBuffer> get_file_buffer(std::string filename, bool async=false);
 bool check_file_exist(const std::string &filename, bool start_async_load=true);
 

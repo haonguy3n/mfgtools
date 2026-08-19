@@ -131,6 +131,17 @@ typedef int(*uuu_ls_usb_devices)(const char *path, const char *chip, const char 
 EXT int uuu_for_each_devices(uuu_ls_usb_devices fn, void *p);
 
 EXT int uuu_run_cmd(const char * cmd, int dry);
+/**
+ * @brief Publish a file that only exists in memory, under the name a script
+ *        will ask for. Overwrites any file already known by that name.
+ *
+ * @param filename name a script uses, e.g. "fw/zImage"
+ * @param data     the contents; copied, so the caller may free it
+ * @param size     length of \p data in bytes
+ * @return 0 on success
+ */
+EXT int uuu_add_file_buffer(const char *filename, const void *data, size_t size);
+
 EXT int uuu_run_cmd_script(const char *script, int dry);
 
 EXT int uuu_auto_detect_file(const char * filename);

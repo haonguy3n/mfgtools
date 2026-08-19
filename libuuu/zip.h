@@ -40,7 +40,9 @@
 
 /* Allow opportunistic use of the C++17 fall-through attribute . */
 #if defined(__cplusplus) && __cplusplus >= 201703L
-#define FALLTHROUGH [[fallthrough]]
+/* Needs its own semicolon: the attribute is only valid on an empty statement,
+   which clang-cl enforces and MSVC does not. */
+#define FALLTHROUGH [[fallthrough]];
 #else
 #define FALLTHROUGH
 #endif

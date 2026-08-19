@@ -1054,6 +1054,16 @@ int check_version(string str)
 	return 0;
 }
 
+/*
+ * Publish a file that only exists in memory, under the name a script asks for.
+ * Together with uuu_run_cmd_script this lets a caller flash data it never wrote
+ * to disk.
+ */
+int uuu_add_file_buffer(const char *filename, const void *data, size_t size)
+{
+	return add_file_buffer_to_map(filename, data, size);
+}
+
 int uuu_run_cmd_script(const char * buff, int /*dry*/)
 {
 	shared_ptr<DataBuffer> p(new DataBuffer((void*)buff, strlen(buff)));

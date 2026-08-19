@@ -1175,7 +1175,12 @@ uint64_t get_file_timesample(const string &filename)
 	return time;
 }
 
-shared_ptr<FileBuffer> get_file_buffer(string filename, bool async)
+/*
+ * The key a file is known by in g_filebuffer_map: relative names are resolved
+ * against the current directory, and separators are normalised, so a script
+ * naming ".\\fw\\zImage" and one naming "fw/zImage" reach the same entry.
+ */
+static string filebuffer_key(string filename)
 {
 	filename = remove_quota(filename);
 
@@ -1192,7 +1197,43 @@ shared_ptr<FileBuffer> get_file_buffer(string filename, bool async)
 
 	path.replace('\\', '/');
 
-	filename = path;
+	return path;
+}
+
+/*
+ * Publish a file that only exists in memory, under the name a script will ask
+ * for. Lets a caller run a script over data it never wrote to disk.
+ */
+int add_file_buffer_to_map(string filename, const void *data, size_t size)
+{
+	if (filename.empty() || data == nullptr || size == 0)
+	{
+		set_last_err_string("Invalid parameter");
+		return -1;
+	}
+
+	filename = filebuffer_key(filename);
+
+	shared_ptr<FileBuffer> p(new FileBuffer);
+	if (p->resize(size))
+	{
+		set_last_err_string("Out of memory");
+		return -1;
+	}
+
+	memcpy(p->data(), data, size);
+	atomic_fetch_or(&p->m_dataflags, FILEBUFFER_FLAG_LOADED);
+
+	{
+		std::lock_guard<mutex> lock(g_mutex_map);
+		g_filebuffer_map[filename] = p;
+	}
+	return 0;
+}
+
+shared_ptr<FileBuffer> get_file_buffer(string filename, bool async)
+{
+	filename = filebuffer_key(filename);
 
 	bool find;
 	{
