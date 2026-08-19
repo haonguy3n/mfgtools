@@ -67,6 +67,8 @@ int file_overwrite_monitor(const std::string &filename, FileBuffer *p);
 #define FILEBUFFER_FLAG_NEVER_FREE		0x8
 #define FILEBUFFER_FLAG_PARTIAL_RELOADABLE 0x10
 #define FILEBUFFER_FLAG_SEG_DONE		0x20
+/* No file behind it: added with uuu_add_file_buffer, so it cannot be reloaded. */
+#define FILEBUFFER_FLAG_MEMORY			0x40
 
 #define FILEBUFFER_FLAG_LOADED		(FILEBUFFER_FLAG_LOADED_BIT|FILEBUFFER_FLAG_KNOWN_SIZE_BIT) // LOADED must be known size
 #define FILEBUFFER_FLAG_KNOWN_SIZE	FILEBUFFER_FLAG_KNOWN_SIZE_BIT

@@ -1228,7 +1228,14 @@ int add_file_buffer_to_map(string filename, const void *data, size_t size)
 	 * as well, so a buffer that does not set it reads back as empty.
 	 */
 	p->m_available_size = size;
-	atomic_fetch_or(&p->m_dataflags, FILEBUFFER_FLAG_LOADED);
+
+	/*
+	 * NEVER_FREE and MEMORY because there is no file to read it back from:
+	 * dropping it, or reloading it because a timestamp changed, would lose it.
+	 */
+	atomic_fetch_or(&p->m_dataflags,
+		FILEBUFFER_FLAG_LOADED | FILEBUFFER_FLAG_NEVER_FREE | FILEBUFFER_FLAG_MEMORY);
+	p->m_request_cv.notify_all();
 
 	{
 		std::lock_guard<mutex> lock(g_mutex_map);
@@ -1267,7 +1274,8 @@ shared_ptr<FileBuffer> get_file_buffer(string filename, bool async)
 			std::lock_guard<mutex> lock(g_mutex_map);
 			p= g_filebuffer_map[filename];
 		}
-		if (p->m_timesample != get_file_timesample(filename))
+		if (!(p->m_dataflags & FILEBUFFER_FLAG_MEMORY)
+			&& p->m_timesample != get_file_timesample(filename))
 			if (p->reload(filename, async))
 			{
 				return nullptr;
@@ -1297,6 +1305,7 @@ FileBuffer::FileBuffer()
 	m_MemSize = 0;
 	m_dataflags = 0;
 	m_available_size = 0;
+	m_timesample = 0;
 }
 
 FileBuffer::FileBuffer(void *p, size_t sz)
