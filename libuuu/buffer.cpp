@@ -1846,24 +1846,21 @@ int FileBuffer::unmapfile()
 
 bool check_file_exist(const string &filename, bool /*start_async_load*/)
 {
-	string_ex fn;
-	fn += remove_quota(filename);
-	string_ex path;
-	if (!fn.empty() && fn[0] != MAGIC_PATH)
-	{
-		if (fn == "..")
-			path += g_current_dir.substr(0, g_current_dir.size() - 1);
-		else
-			path += g_current_dir + fn;
-	}
-	else {
-		path = fn;
-	}
-
-	path.replace('\\', '/');
+	string path = filebuffer_key(filename);
 
 	if (path.empty())
-		path += "./";
+		path = "./";
+
+	/*
+	 * A file added with uuu_add_file_buffer exists as far as a script is
+	 * concerned, and asking the filesystem about it would say otherwise.
+	 */
+	{
+		std::lock_guard<mutex> lock(g_mutex_map);
+		if (g_filebuffer_map.find(path) != g_filebuffer_map.end())
+			return true;
+	}
+
 	return g_fs_data.exist(path);
 }
 

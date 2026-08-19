@@ -61,10 +61,6 @@ int uuu_set_askpasswd(uuu_askpasswd ask)
 
 map<string, pair<string, string>> g_passwd_map;
 
-#ifdef UUUSSL
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-
 static const char* base64_table =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	"abcdefghijklmnopqrstuvwxyz"
@@ -110,6 +106,10 @@ static string base64_encode(string str)
 	}
 	return ret;
 }
+
+#ifdef UUUSSL
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 class CUUUSSL
 {
