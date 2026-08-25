@@ -40,6 +40,7 @@
 #include "zip.h"
 #include "fat.h"
 #include "tar.h"
+#include <ctype.h>
 #include <string.h>
 #include "bzlib.h"
 #include "stdio.h"
@@ -1180,6 +1181,23 @@ uint64_t get_file_timesample(const string &filename)
  * against the current directory, and separators are normalised, so a script
  * naming ".\\fw\\zImage" and one naming "fw/zImage" reach the same entry.
  */
+/*
+ * Whether a name already says where it is, so that resolving it against the
+ * current directory would be wrong. Covers a POSIX root, a Windows root and a
+ * drive letter. Separators are not normalised until later in filebuffer_key,
+ * so both kinds count here.
+ */
+static bool is_rooted(const string &filename)
+{
+	if (filename.empty())
+		return false;
+
+	if (filename[0] == '/' || filename[0] == '\\')
+		return true;
+
+	return filename.size() > 1 && filename[1] == ':' && isalpha((unsigned char)filename[0]);
+}
+
 static string filebuffer_key(string filename)
 {
 	filename = remove_quota(filename);
@@ -1188,6 +1206,8 @@ static string filebuffer_key(string filename)
 	{
 		if (filename == "..")
 			filename = g_current_dir.substr(0, g_current_dir.size() - 1);
+		else if (is_rooted(filename))
+			filename.insert(filename.begin(), MAGIC_PATH);
 		else
 			filename = g_current_dir + filename;
 	}
