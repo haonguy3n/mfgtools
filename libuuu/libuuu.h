@@ -142,6 +142,15 @@ EXT int uuu_run_cmd(const char * cmd, int dry);
  */
 EXT int uuu_add_file_buffer(const char *filename, const void *data, size_t size);
 
+/**
+ * @brief Forget every file published with uuu_add_file_buffer. Files read from
+ *        disk are left alone. A script asking for one afterwards fails to find
+ *        it, as though it had never been published.
+ *
+ * @return 0 on success
+ */
+EXT int uuu_forget_file_buffers(void);
+
 EXT int uuu_run_cmd_script(const char *script, int dry);
 
 EXT int uuu_auto_detect_file(const char * filename);

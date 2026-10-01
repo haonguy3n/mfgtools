@@ -1264,6 +1264,23 @@ int add_file_buffer_to_map(string filename, const void *data, size_t size)
 	return 0;
 }
 
+/*
+ * Drop what add_file_buffer_to_map published. Only the map's reference goes;
+ * a buffer a running command still holds lives until that command lets go.
+ */
+int forget_file_buffers()
+{
+	std::lock_guard<mutex> lock(g_mutex_map);
+	for (auto it = g_filebuffer_map.begin(); it != g_filebuffer_map.end();)
+	{
+		if (it->second->m_dataflags & FILEBUFFER_FLAG_MEMORY)
+			it = g_filebuffer_map.erase(it);
+		else
+			++it;
+	}
+	return 0;
+}
+
 shared_ptr<FileBuffer> get_file_buffer(string filename, bool async)
 {
 	filename = filebuffer_key(filename);

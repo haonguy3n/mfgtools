@@ -168,6 +168,7 @@ public:
 	friend class DataBuffer;
 	/* Fills a FileBuffer from memory instead of from a file. */
 	friend int add_file_buffer_to_map(std::string filename, const void *data, size_t size);
+int forget_file_buffers();
 	friend class FSBase;
 	friend class FSFlat;
 	friend class FSHttps;
@@ -344,6 +345,7 @@ private:
 };
 
 int add_file_buffer_to_map(std::string filename, const void *data, size_t size);
+int forget_file_buffers();
 std::shared_ptr<FileBuffer> get_file_buffer(std::string filename, bool async=false);
 bool check_file_exist(const std::string &filename, bool start_async_load=true);
 
